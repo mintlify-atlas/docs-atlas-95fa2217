@@ -1,0 +1,56 @@
+{
+  "projectType": "frontend",
+  "projectName": "CO2 Monitor",
+  "projectDescription": "Progressive Web App for real-time CO2 monitoring in greenhouse environments with interactive data visualization",
+  "theme": "palm",
+  "primaryColor": "#4BC0C0",
+  "lightColor": "#7DD3D3",
+  "darkColor": "#2A9999",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "installation", "quickstart"]
+          },
+          {
+            "group": "Features",
+            "pages": ["features/real-time-monitoring", "features/data-visualization", "features/pwa-capabilities"]
+          },
+          {
+            "group": "Components",
+            "pages": ["components/dashboard", "components/header", "components/chart"]
+          },
+          {
+            "group": "Configuration",
+            "pages": ["configuration/api-setup", "configuration/environment"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Data API",
+            "pages": ["api/co2-endpoint", "api/data-format"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Real-time CO2 monitoring with 5-second refresh intervals",
+    "Interactive charts using Chart.js and React",
+    "Progressive Web App with offline capabilities",
+    "Responsive design for mobile, tablet, and desktop",
+    "External API integration for CO2 data"
+  ],
+  "publicApiSurface": [
+    "CO2Dashboard component",
+    "Header component",
+    "formatTime utility function",
+    "GET https://co2-api.vercel.app/api/co2"
+  ]
+}
