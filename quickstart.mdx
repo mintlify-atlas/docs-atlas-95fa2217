@@ -1,80 +1,217 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get your CO2 monitoring dashboard up and running in minutes
 ---
 
-## Get started in three steps
+## Overview
 
-Get your documentation site running locally and make your first customization.
+This guide will help you get the CO2 Monitor application running locally and displaying real-time CO2 data in just a few minutes.
 
-### Step 1: Set up your local environment
+## Quick Installation
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Clone and navigate">
+    ```bash
+    git clone https://github.com/OsmelMdz/sistema-de-co2.git
+    cd sistema-de-co2
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step title="Start the application">
+    ```bash
+    npm start
+    ```
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+    The application will open automatically at `http://localhost:3000`
+  </Step>
+</Steps>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  The application connects to a live API endpoint at `https://co2-api.vercel.app/api/co2` and starts displaying data immediately.
 </Note>
+
+## What You'll See
+
+Once the application loads, you'll see:
+
+1. **Header** - "Sistema de Monitoreo de CO2" title
+2. **Real-time CO2 Reading** - Large display showing current CO2 levels in ppm (parts per million)
+3. **Interactive Chart** - Line graph showing the last 10 CO2 measurements updated every 5 seconds
+
+## Understanding the Dashboard
+
+### Real-time Updates
+
+The dashboard automatically fetches new CO2 data every 5 seconds from the API endpoint:
+
+```javascript CO2Dashboard.js
+const intervalId = setInterval(fetchData, 5000);
+```
+
+### Data Display
+
+The application shows:
+
+- **Current Level**: Latest CO2 measurement in ppm
+- **Historical Trend**: Rolling window of the last 10 measurements
+- **Timestamps**: Formatted in 24-hour format (HH:MM:SS)
+
+### API Response Format
+
+The API endpoint returns CO2 data in this format:
+
+```json
+{
+  "co2": 450,
+  "timestamp": "13/03/26, 10:30 a.m."
+}
+```
+
+## Application Structure
+
+The CO2 Monitor is built with a simple component hierarchy:
+
+```javascript App.js
+import React from "react";
+import Header from "./components/Header";
+import CO2Dashboard from "./components/CO2Dashboard";
+import "./styles.css";
+
+function App() {
+  return (
+    <div>
+      <Header />
+      <CO2Dashboard />
+    </div>
+  );
+}
+```
+
+### Key Components
+
+<CardGroup cols={2}>
+  <Card title="Header" icon="heading">
+    Displays the application title
+  </Card>
+  <Card title="CO2Dashboard" icon="chart-line">
+    Handles data fetching, state management, and chart rendering
+  </Card>
+</CardGroup>
+
+## Core Technologies
+
+The application uses these key libraries:
+
+### Chart.js Integration
+
+```javascript CO2Dashboard.js
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+```
+
+### API Communication
+
+```javascript CO2Dashboard.js
+import axios from "axios";
+
+const fetchData = async () => {
+  try {
+    const response = await axios.get("https://co2-api.vercel.app/api/co2");
+    const { co2, timestamp } = response.data;
+    setLatestCO2(co2);
+    // Update chart data...
+  } catch (error) {
+    console.error("Error fetching CO2 data:", error);
+  }
+};
+```
+
+## State Management
+
+The dashboard maintains three key state variables:
+
+```javascript
+const [co2Data, setCo2Data] = useState([]);        // Array of CO2 readings
+const [timestamps, setTimestamps] = useState([]);  // Formatted timestamps
+const [latestCO2, setLatestCO2] = useState(null);  // Current reading
+```
+
+Each new data point is added to the arrays, maintaining only the last 10 readings:
+
+```javascript
+setCo2Data((prevData) => {
+  const newData = [...prevData, co2];
+  if (newData.length > 10) newData.shift();
+  return newData;
+});
+```
+
+## Progressive Web App (PWA)
+
+CO2 Monitor is built as a Progressive Web App, which means:
+
+- Can be installed on mobile devices
+- Works offline (after initial load)
+- Responsive design adapts to all screen sizes
+- Fast loading and performance
+
+<Tip>
+  On mobile devices, you can add the app to your home screen for quick access. Look for the "Add to Home Screen" option in your browser menu.
+</Tip>
+
+## Next Steps
+
+Now that you have the application running, explore these topics:
+
+<CardGroup cols={2}>
+  <Card title="Real-time Monitoring" icon="chart-line" href="/features/real-time-monitoring">
+    Understand how real-time data updates work
+  </Card>
+  <Card title="Components" icon="puzzle-piece" href="/components/dashboard">
+    Deep dive into the React components
+  </Card>
+  <Card title="API Reference" icon="plug" href="/api/co2-endpoint">
+    Learn about the CO2 API and data fetching
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/api-setup">
+    Configure the application for your needs
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+### No Data Displayed
+
+If the dashboard shows "Cargando..." (Loading...) indefinitely:
+
+1. Check your internet connection
+2. Verify the API endpoint is accessible: `https://co2-api.vercel.app/api/co2`
+3. Check browser console for error messages
+
+### Chart Not Rendering
+
+If the chart area is blank:
+
+1. Ensure Chart.js dependencies are installed
+2. Check that the chart container has proper dimensions in CSS
+3. Verify that data is being received (check browser console logs)
+
+### Port Conflicts
+
+If port 3000 is already in use:
+
+```bash
+PORT=3001 npm start
+```
+
+<Warning>
+  The application requires an active internet connection to fetch CO2 data from the API endpoint. Offline functionality is limited to the cached UI.
+</Warning>

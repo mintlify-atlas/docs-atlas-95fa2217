@@ -1,0 +1,165 @@
+---
+title: Installation
+description: Get CO2 Monitor installed and running on your local machine
+---
+
+## Prerequisites
+
+Before installing CO2 Monitor, ensure you have the following installed on your system:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 14.0 or higher recommended
+  </Card>
+  <Card title="npm" icon="box">
+    Comes bundled with Node.js
+  </Card>
+</CardGroup>
+
+You can verify your installations by running:
+
+```bash
+node --version
+npm --version
+```
+
+## Installation Steps
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the CO2 Monitor repository to your local machine:
+    
+    ```bash
+    git clone https://github.com/OsmelMdz/sistema-de-co2.git
+    cd sistema-de-co2
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all required dependencies using your preferred package manager:
+    
+    <CodeGroup>
+    ```bash npm
+    npm install
+    ```
+
+    ```bash yarn
+    yarn install
+    ```
+
+    ```bash pnpm
+    pnpm install
+    ```
+    </CodeGroup>
+
+    This will install the following key dependencies:
+    
+    - **React** (^18.3.1) - UI framework
+    - **Chart.js** (^4.4.6) - Interactive charts
+    - **react-chartjs-2** (^5.2.0) - React wrapper for Chart.js
+    - **axios** (^1.7.7) - HTTP client for API requests
+    - **react-scripts** (5.0.1) - Create React App tooling
+  </Step>
+
+  <Step title="Start the development server">
+    Launch the application in development mode:
+    
+    <CodeGroup>
+    ```bash npm
+    npm start
+    ```
+
+    ```bash yarn
+    yarn start
+    ```
+
+    ```bash pnpm
+    pnpm start
+    ```
+    </CodeGroup>
+
+    The application will automatically open in your default browser at `http://localhost:3000`.
+  </Step>
+</Steps>
+
+<Note>
+  The development server includes hot reloading, so any changes you make to the source code will automatically refresh the browser.
+</Note>
+
+## Available Scripts
+
+The following npm scripts are available in the project:
+
+```json package.json
+{
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+### Script Descriptions
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| **start** | `npm start` | Runs the app in development mode on port 3000 |
+| **build** | `npm run build` | Creates an optimized production build |
+| **test** | `npm test` | Launches the test runner in watch mode |
+| **eject** | `npm run eject` | Ejects from Create React App (one-way operation) |
+
+## Building for Production
+
+To create an optimized production build:
+
+<CodeGroup>
+```bash npm
+npm run build
+```
+
+```bash yarn
+yarn build
+```
+
+```bash pnpm
+pnpm build
+```
+</CodeGroup>
+
+The build artifacts will be stored in the `build/` directory, ready for deployment.
+
+<Warning>
+  The `eject` script is a one-way operation. Once you eject, you can't go back. Only use this if you need full control over the build configuration.
+</Warning>
+
+## Troubleshooting
+
+### Port 3000 Already in Use
+
+If port 3000 is already occupied, the development server will prompt you to use a different port. You can also manually specify a port:
+
+```bash
+PORT=3001 npm start
+```
+
+### Module Not Found Errors
+
+If you encounter module errors, try removing `node_modules` and reinstalling:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Get up and running with your first CO2 monitoring dashboard
+  </Card>
+  <Card title="Components" icon="cube" href="/components/dashboard">
+    Learn about the system components
+  </Card>
+</CardGroup>

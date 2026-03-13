@@ -1,0 +1,162 @@
+---
+title: 'Real-Time Monitoring'
+description: 'Live CO2 data updates using React hooks and polling'
+---
+
+## Overview
+
+The CO2 Monitor implements real-time data monitoring using React's `useEffect` hook with a polling mechanism that fetches fresh sensor data every 5 seconds from the backend API.
+
+## Polling Mechanism
+
+The application uses `setInterval` within a `useEffect` hook to continuously poll the API endpoint:
+
+```javascript src/components/CO2Dashboard.js
+useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("https://co2-api.vercel.app/api/co2");
+            const { co2, timestamp } = response.data;
+
+            console.log("Nuevo dato recibido:", { timestamp, co2 });
+
+            setLatestCO2(co2);
+            setCo2Data((prevData) => {
+                const newData = [...prevData, co2];
+                if (newData.length > 10) newData.shift();
+                return newData;
+            });
+
+            setTimestamps((prevTimestamps) => {
+                const newTimestamps = [...prevTimestamps, formatTime(timestamp)];
+                if (newTimestamps.length > 10) newTimestamps.shift();
+                return newTimestamps;
+            });
+        } catch (error) {
+            console.error("Error fetching CO2 data:", error);
+        }
+    };
+
+    const intervalId = setInterval(fetchData, 5000);
+    return () => clearInterval(intervalId);
+}, []);
+```
+
+<Info>
+The 5-second interval (5000ms) provides a balance between real-time responsiveness and server load.
+</Info>
+
+## State Management
+
+The dashboard maintains three key state variables:
+
+<CardGroup cols={3}>
+  <Card title="co2Data" icon="chart-line">
+    Array of CO2 readings (last 10 values)
+  </Card>
+  <Card title="timestamps" icon="clock">
+    Formatted time labels for chart display
+  </Card>
+  <Card title="latestCO2" icon="gauge">
+    Current CO2 reading displayed prominently
+  </Card>
+</CardGroup>
+
+## API Endpoint
+
+The application fetches data from:
+
+```
+GET https://co2-api.vercel.app/api/co2
+```
+
+### Response Format
+
+```json
+{
+  "co2": 450,
+  "timestamp": "13/03/26, 09:45 a.m."
+}
+```
+
+<Note>
+The timestamp format uses DD/MM/YY with 12-hour time format and is converted to 24-hour format for display.
+</Note>
+
+## Data Processing
+
+### Rolling Window
+
+The application maintains a rolling window of the last 10 data points:
+
+```javascript
+const newData = [...prevData, co2];
+if (newData.length > 10) newData.shift(); // Remove oldest point
+```
+
+This ensures the chart displays recent data without overwhelming the visualization.
+
+### Timestamp Formatting
+
+Timestamps are converted from the API's format to a consistent 24-hour display format:
+
+```javascript src/components/CO2Dashboard.js
+const formatTime = (timestamp) => {
+    const [datePart, timePartWithPeriod] = timestamp.split(", ");
+    const [day, month, year] = datePart.split("/");
+    const [timePart, period] = timePartWithPeriod.split(" ");
+    let [hours, minutes] = timePart.split(":");
+    
+    if (period.toLowerCase() === "p.m." && hours !== "12") {
+        hours = parseInt(hours) + 12;
+    } else if (period.toLowerCase() === "a.m." && hours === "12") {
+        hours = "00";
+    }
+    
+    const isoDate = `20${year}-${month}-${day}T${hours}:${minutes}:00`;
+    const date = new Date(isoDate);
+    
+    return date.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+};
+```
+
+## Error Handling
+
+The fetch operation includes try-catch error handling that logs errors to the console:
+
+```javascript
+catch (error) {
+    console.error("Error fetching CO2 data:", error);
+}
+```
+
+<Warning>
+Network errors or API downtime are logged but don't crash the application. The UI continues to display the last known value.
+</Warning>
+
+## Cleanup
+
+The `useEffect` hook returns a cleanup function to prevent memory leaks:
+
+```javascript
+return () => clearInterval(intervalId);
+```
+
+This ensures the interval is cleared when the component unmounts.
+
+## Dependencies
+
+Real-time monitoring relies on:
+
+- **axios**: HTTP client for API requests
+- **React hooks**: `useState` for state management, `useEffect` for lifecycle
+- **Browser APIs**: `setInterval` for polling mechanism
+
+<Check>
+The polling mechanism continues running as long as the component is mounted, providing continuous real-time updates.
+</Check>

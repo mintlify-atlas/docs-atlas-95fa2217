@@ -1,0 +1,222 @@
+---
+title: 'Data Visualization'
+description: 'Interactive charts powered by Chart.js and React'
+---
+
+## Overview
+
+The CO2 Monitor uses Chart.js with the React wrapper `react-chartjs-2` to display CO2 levels in an interactive line chart that updates in real-time.
+
+## Chart.js Configuration
+
+The application registers required Chart.js components:
+
+```javascript src/components/CO2Dashboard.js
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+```
+
+<Info>
+Only the necessary Chart.js components are registered to keep the bundle size optimized.
+</Info>
+
+## Line Chart Implementation
+
+The dashboard uses the `Line` component from react-chartjs-2:
+
+```jsx src/components/CO2Dashboard.js
+<Line data={data} options={{
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        x: { 
+            ticks: { color: "#555" }, 
+            title: { display: true, text: 'Tiempo' } 
+        },
+        y: { 
+            ticks: { color: "#555" }, 
+            title: { display: true, text: 'CO2 (ppm)' } 
+        },
+    },
+    plugins: {
+        tooltip: {
+            callbacks: {
+                label: (context) => `${context.parsed.y} ppm`
+            }
+        }
+    }
+}} />
+```
+
+## Data Structure
+
+The chart data object follows Chart.js conventions:
+
+```javascript src/components/CO2Dashboard.js
+const data = {
+    labels: timestamps,
+    datasets: [
+        {
+            label: "Niveles de CO2 (ppm)",
+            data: co2Data,
+            fill: false,
+            backgroundColor: "rgba(75,192,192,1)",
+            borderColor: "rgba(75,192,192,0.2)",
+        },
+    ],
+};
+```
+
+<CardGroup cols={2}>
+  <Card title="labels" icon="tags">
+    Array of formatted timestamps for the x-axis
+  </Card>
+  <Card title="data" icon="chart-line">
+    Array of CO2 readings (ppm) for the y-axis
+  </Card>
+</CardGroup>
+
+## 10-Point Rolling Window
+
+The chart displays only the most recent 10 data points to maintain readability:
+
+```javascript
+setCo2Data((prevData) => {
+    const newData = [...prevData, co2];
+    if (newData.length > 10) newData.shift(); // Keep only last 10 points
+    return newData;
+});
+
+setTimestamps((prevTimestamps) => {
+    const newTimestamps = [...prevTimestamps, formatTime(timestamp)];
+    if (newTimestamps.length > 10) newTimestamps.shift();
+    return newTimestamps;
+});
+```
+
+<Note>
+This rolling window approach ensures the chart remains readable and performant by limiting the number of displayed data points.
+</Note>
+
+## Chart Options
+
+### Responsive Design
+
+```javascript
+responsive: true,
+maintainAspectRatio: false,
+```
+
+The chart adapts to its container size and ignores the default aspect ratio, allowing it to fill the available space.
+
+### Axis Configuration
+
+**X-Axis (Time)**
+- Custom title: "Tiempo"
+- Tick color: `#555` (gray)
+- Displays formatted timestamps
+
+**Y-Axis (CO2 Levels)**
+- Custom title: "CO2 (ppm)"
+- Tick color: `#555` (gray)
+- Automatically scales based on data range
+
+### Tooltip Customization
+
+Tooltips display CO2 values with the "ppm" unit:
+
+```javascript
+plugins: {
+    tooltip: {
+        callbacks: {
+            label: (context) => `${context.parsed.y} ppm`
+        }
+    }
+}
+```
+
+## Chart Styling
+
+The chart container is styled for responsive display:
+
+```css src/components/CO2Dashboard.css
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    max-width: 1000px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+        width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container {
+        height: 250px;
+        width: auto;
+    }
+}
+```
+
+<CardGroup cols={3}>
+  <Card title="Desktop" icon="desktop">
+    400px height, max 1000px width
+  </Card>
+  <Card title="Tablet" icon="tablet">
+    300px height, auto width
+  </Card>
+  <Card title="Mobile" icon="mobile">
+    250px height, auto width
+  </Card>
+</CardGroup>
+
+## Color Scheme
+
+The chart uses a teal color palette:
+
+- **Line/Points**: `rgba(75,192,192,1)` - Solid teal
+- **Border**: `rgba(75,192,192,0.2)` - Semi-transparent teal
+- **Axis Ticks**: `#555` - Gray for readability
+
+<Check>
+The color scheme provides good contrast while maintaining a clean, professional appearance.
+</Check>
+
+## Real-Time Updates
+
+As new data arrives every 5 seconds, the chart automatically re-renders with updated datasets. React's state management triggers re-renders when `co2Data` or `timestamps` change.
+
+## Performance Considerations
+
+<AccordionGroup>
+  <Accordion title="Bundle Size Optimization">
+    Only necessary Chart.js components are imported and registered, reducing bundle size.
+  </Accordion>
+  
+  <Accordion title="Data Point Limiting">
+    The 10-point rolling window prevents performance degradation from excessive data points.
+  </Accordion>
+  
+  <Accordion title="Aspect Ratio Disabled">
+    Setting `maintainAspectRatio: false` allows for flexible container sizing without layout shifts.
+  </Accordion>
+</AccordionGroup>
+
+## Dependencies
+
+```json package.json
+{
+  "chart.js": "^4.x",
+  "react-chartjs-2": "^5.x"
+}
+```
+
+<Warning>
+Ensure Chart.js version 4.x or higher is used, as the registration API changed significantly from version 3.
+</Warning>

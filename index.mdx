@@ -1,97 +1,85 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Introduction
+description: Progressive Web App for real-time CO2 monitoring in greenhouse environments with interactive data visualization
 ---
 
-## Setting up
+# Welcome to CO2 Monitor
 
-Get your documentation site up and running in minutes.
+CO2 Monitor is a Progressive Web App (PWA) designed for real-time monitoring of carbon dioxide levels in greenhouse environments. Built with React and Chart.js, it provides an intuitive, responsive interface for visualizing CO2 data across all devices.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running in minutes with our quick start guide
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Installation" icon="download" href="/installation">
+    Step-by-step installation instructions
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Components" icon="cube" href="/components/dashboard">
+    Explore the component architecture
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API Reference" icon="code" href="/api/co2-endpoint">
+    Learn about the CO2 data API
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key Features
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Real-time Monitoring" icon="chart-line">
+    Updates every 5 seconds with the latest CO2 levels from your greenhouse environment
+  </Card>
+  <Card title="Interactive Charts" icon="chart-area">
+    Visualize CO2 trends with Chart.js powered graphs that update dynamically
+  </Card>
+  <Card title="Progressive Web App" icon="mobile">
+    Install on any device and access offline with full PWA capabilities
+  </Card>
+  <Card title="Responsive Design" icon="desktop">
+    Optimized experience across mobile, tablet, and desktop devices
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Technologies
 
-## Need inspiration?
+CO2 Monitor is built with modern web technologies:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+- **React.js** - Interactive UI library for building the dashboard
+- **Chart.js** - Powerful charting library for data visualization
+- **React Chart.js 2** - React wrapper for Chart.js integration
+- **Axios** - HTTP client for API communication
+- **PWA** - Service workers and manifest for offline capabilities
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Greenhouse Management">
+    Monitor CO2 levels in real-time to optimize growing conditions and ensure healthy plant development. Track trends over time to identify patterns and adjust ventilation systems accordingly.
+  </Accordion>
+  <Accordion title="Indoor Agriculture">
+    Maintain optimal CO2 concentrations for vertical farms and controlled environment agriculture. Receive instant updates on environmental conditions to prevent crop stress.
+  </Accordion>
+  <Accordion title="Research & Development">
+    Collect accurate CO2 data for agricultural research projects. Export historical data and analyze environmental impact on plant growth rates.
+  </Accordion>
+  <Accordion title="Quality Control">
+    Ensure consistent CO2 levels meet industry standards for organic certification and crop quality. Monitor multiple zones simultaneously with responsive dashboard.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<Steps>
+  <Step title="Install Dependencies">
+    Follow the [installation guide](/installation) to set up CO2 Monitor on your system
+  </Step>
+  <Step title="Configure API">
+    Connect to your CO2 sensor API endpoint in the [configuration](/configuration/api-setup)
+  </Step>
+  <Step title="Launch Dashboard">
+    Start the development server and begin monitoring your greenhouse environment
+  </Step>
+</Steps>
+
+<Note>
+  CO2 Monitor connects to an external API at `https://co2-api.vercel.app/api/co2` by default. You can configure this endpoint to connect to your own CO2 sensors.
+</Note>

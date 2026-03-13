@@ -1,0 +1,201 @@
+---
+title: 'CO2Dashboard Component'
+description: 'Main dashboard component for real-time CO2 monitoring'
+---
+
+## Overview
+
+The `CO2Dashboard` component is the heart of the CO2 monitoring application. It fetches real-time CO2 data from the API, displays the latest reading, and renders an interactive line chart showing historical trends.
+
+**Location:** `src/components/CO2Dashboard.js`
+
+## State Management
+
+The component uses React hooks to manage three pieces of state:
+
+<ParamField path="co2Data" type="array">
+  Array of CO2 readings (up to 10 most recent values)
+</ParamField>
+
+<ParamField path="timestamps" type="array">
+  Array of formatted timestamps corresponding to each CO2 reading
+</ParamField>
+
+<ParamField path="latestCO2" type="number">
+  The most recent CO2 reading in ppm (parts per million)
+</ParamField>
+
+## Implementation
+
+### Data Fetching
+
+The component fetches data every 5 seconds using `useEffect` and `setInterval`:
+
+```javascript
+useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("https://co2-api.vercel.app/api/co2");
+            const { co2, timestamp } = response.data;
+
+            setLatestCO2(co2);
+            setCo2Data((prevData) => {
+                const newData = [...prevData, co2];
+                if (newData.length > 10) newData.shift();
+                return newData;
+            });
+
+            setTimestamps((prevTimestamps) => {
+                const newTimestamps = [...prevTimestamps, formatTime(timestamp)];
+                if (newTimestamps.length > 10) newTimestamps.shift();
+                return newTimestamps;
+            });
+        } catch (error) {
+            console.error("Error fetching CO2 data:", error);
+        }
+    };
+
+    const intervalId = setInterval(fetchData, 5000);
+    return () => clearInterval(intervalId);
+}, []);
+```
+
+### Time Formatting Utility
+
+The `formatTime` function converts timestamp strings from the API format to a localized 24-hour time format:
+
+```javascript
+const formatTime = (timestamp) => {
+    const [datePart, timePartWithPeriod] = timestamp.split(", ");
+    const [day, month, year] = datePart.split("/");
+    const [timePart, period] = timePartWithPeriod.split(" ");
+    let [hours, minutes] = timePart.split(":");
+    
+    if (period.toLowerCase() === "p.m." && hours !== "12") {
+        hours = parseInt(hours) + 12;
+    } else if (period.toLowerCase() === "a.m." && hours === "12") {
+        hours = "00";
+    }
+    
+    const isoDate = `20${year}-${month}-${day}T${hours}:${minutes}:00`;
+    const date = new Date(isoDate);
+    
+    return date.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+};
+```
+
+**Input format:** `"DD/MM/YY, HH:MM A.M./P.M."`
+
+**Output format:** `"HH:MM:SS"` (24-hour format, Mexico timezone)
+
+## Chart Configuration
+
+The component prepares data for the Chart.js Line component:
+
+```javascript
+const data = {
+    labels: timestamps,
+    datasets: [
+        {
+            label: "Niveles de CO2 (ppm)",
+            data: co2Data,
+            fill: false,
+            backgroundColor: "rgba(75,192,192,1)",
+            borderColor: "rgba(75,192,192,0.2)",
+        },
+    ],
+};
+```
+
+### Chart Options
+
+The chart is configured with custom scales and tooltips:
+
+<ParamField path="responsive" type="boolean" default="true">
+  Chart adjusts to container size
+</ParamField>
+
+<ParamField path="maintainAspectRatio" type="boolean" default="false">
+  Allows chart to fill container height
+</ParamField>
+
+<ParamField path="scales.x" type="object">
+  X-axis configuration with "Tiempo" (Time) label
+</ParamField>
+
+<ParamField path="scales.y" type="object">
+  Y-axis configuration with "CO2 (ppm)" label
+</ParamField>
+
+<ParamField path="plugins.tooltip.callbacks.label" type="function">
+  Custom tooltip formatter displaying values with "ppm" suffix
+</ParamField>
+
+## Rendered Output
+
+The component renders:
+
+1. **Title:** "Medición en Tiempo Real" (Real-Time Measurement)
+2. **Current Reading:** Large display showing latest CO2 value or "Cargando..." (Loading...)
+3. **Chart:** Line graph showing the last 10 readings with timestamps
+
+```javascript
+return (
+    <div className="dashboard">
+        <h2>Medición en Tiempo Real</h2>
+        <h1>{latestCO2 ? `${latestCO2} ppm` : "Cargando..."}</h1>
+        <div className="chart-container">
+            <Line data={data} options={{...}} />
+        </div>
+    </div>
+);
+```
+
+## Styling
+
+The component uses `CO2Dashboard.css` for styling:
+
+- **Layout:** Flexbox with centered vertical alignment
+- **Font:** Arial sans-serif
+- **Primary Color:** #00796b (teal)
+- **Chart Container:** Responsive with max-width of 1000px and height of 400px
+- **Mobile Responsive:** Breakpoints at 768px and 480px for tablet and mobile devices
+
+## Dependencies
+
+<CodeGroup>
+```javascript React
+import React, { useEffect, useState } from "react";
+```
+
+```javascript Chart.js
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+```
+
+```javascript HTTP Client
+import axios from "axios";
+```
+</CodeGroup>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Real-Time Updates" icon="clock">
+    Fetches new data every 5 seconds automatically
+  </Card>
+  <Card title="Rolling Window" icon="window">
+    Maintains only the 10 most recent data points
+  </Card>
+  <Card title="Responsive Design" icon="mobile">
+    Adapts to different screen sizes seamlessly
+  </Card>
+  <Card title="Error Handling" icon="shield">
+    Gracefully handles API errors with console logging
+  </Card>
+</CardGroup>

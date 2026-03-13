@@ -1,0 +1,227 @@
+---
+title: 'Data Format & Parsing'
+description: 'Understanding the timestamp format and data transformation logic'
+---
+
+## Overview
+
+The CO2 API returns timestamps in a custom format that requires parsing and transformation for proper display and chart rendering.
+
+## Timestamp Format
+
+The API returns timestamps in the following format:
+
+```
+DD/MM/YY, HH:MM A.M./P.M.
+```
+
+### Format Breakdown
+
+<ParamField path="DD" type="string">
+  Day of month (01-31)
+</ParamField>
+
+<ParamField path="MM" type="string">
+  Month (01-12)
+</ParamField>
+
+<ParamField path="YY" type="string">
+  Year, last two digits (e.g., "26" for 2026)
+</ParamField>
+
+<ParamField path="HH:MM" type="string">
+  Time in 12-hour format with minutes
+</ParamField>
+
+<ParamField path="A.M./P.M." type="string">
+  Period indicator (morning/afternoon)
+</ParamField>
+
+### Example Timestamps
+
+```javascript
+"13/03/26, 02:30 P.M."  // March 13, 2026 at 2:30 PM
+"13/03/26, 09:15 A.M."  // March 13, 2026 at 9:15 AM
+"01/12/25, 12:00 P.M."  // December 1, 2025 at noon
+```
+
+## Time Formatting Function
+
+The `formatTime` function converts the API timestamp into a localized time string suitable for chart labels.
+
+### Implementation
+
+From `src/components/CO2Dashboard.js:14-36`:
+
+```javascript
+const formatTime = (timestamp) => {
+  // Split timestamp into date and time components
+  const [datePart, timePartWithPeriod] = timestamp.split(", ");
+  const [day, month, year] = datePart.split("/");
+  const [timePart, period] = timePartWithPeriod.split(" ");
+  let [hours, minutes] = timePart.split(":");
+  
+  // Convert 12-hour format to 24-hour format
+  if (period.toLowerCase() === "p.m." && hours !== "12") {
+    hours = parseInt(hours) + 12;
+  } else if (period.toLowerCase() === "a.m." && hours === "12") {
+    hours = "00";
+  }
+  
+  // Construct ISO 8601 date string
+  const isoDate = `20${year}-${month}-${day}T${hours}:${minutes}:00`;
+  const date = new Date(isoDate);
+  
+  // Validate date
+  if (isNaN(date)) {
+    console.error("Fecha no válida:", timestamp);
+    return "Invalid Date";
+  }
+  
+  // Format for display (24-hour format, Spanish locale)
+  return date.toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+};
+```
+
+## Parsing Logic
+
+### Step 1: Split Components
+
+```javascript
+const [datePart, timePartWithPeriod] = timestamp.split(", ");
+// datePart: "13/03/26"
+// timePartWithPeriod: "02:30 P.M."
+```
+
+### Step 2: Extract Date Parts
+
+```javascript
+const [day, month, year] = datePart.split("/");
+// day: "13"
+// month: "03"
+// year: "26"
+```
+
+### Step 3: Extract Time Parts
+
+```javascript
+const [timePart, period] = timePartWithPeriod.split(" ");
+let [hours, minutes] = timePart.split(":");
+// hours: "02"
+// minutes: "30"
+// period: "P.M."
+```
+
+### Step 4: Convert to 24-Hour Format
+
+<CodeGroup>
+```javascript PM Conversion
+if (period.toLowerCase() === "p.m." && hours !== "12") {
+  hours = parseInt(hours) + 12;
+}
+// "02" P.M. becomes 14
+// "12" P.M. stays 12 (noon)
+```
+
+```javascript AM Conversion
+if (period.toLowerCase() === "a.m." && hours === "12") {
+  hours = "00";
+}
+// "12" A.M. becomes "00" (midnight)
+```
+</CodeGroup>
+
+### Step 5: Create ISO Date String
+
+```javascript
+const isoDate = `20${year}-${month}-${day}T${hours}:${minutes}:00`;
+// Result: "2026-03-13T14:30:00"
+```
+
+### Step 6: Format for Display
+
+```javascript
+return date.toLocaleTimeString('es-MX', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false
+});
+// Result: "14:30:00"
+```
+
+## Data Types
+
+### API Response Types
+
+<ResponseField name="co2" type="number">
+  Integer or float representing CO2 concentration in parts per million (ppm)
+  
+  Expected range: 300-5000 ppm (typical atmospheric values)
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  String in format `DD/MM/YY, HH:MM A.M./P.M.`
+  
+  Must be parseable according to the format specification
+</ResponseField>
+
+### Internal Data Structures
+
+```typescript
+// State management in CO2Dashboard component
+const [co2Data, setCo2Data] = useState<number[]>([]);
+const [timestamps, setTimestamps] = useState<string[]>([]);
+const [latestCO2, setLatestCO2] = useState<number | null>(null);
+```
+
+## Validation
+
+### Date Validation
+
+The function includes validation to catch invalid dates:
+
+```javascript
+if (isNaN(date)) {
+  console.error("Fecha no válida:", timestamp);
+  return "Invalid Date";
+}
+```
+
+### Common Invalid Formats
+
+- Missing period indicator (A.M./P.M.)
+- Invalid date components (e.g., month 13)
+- Malformed timestamp structure
+- Non-numeric time values
+
+## Localization
+
+The formatted output uses Spanish (Mexico) locale:
+
+```javascript
+date.toLocaleTimeString('es-MX', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false
+})
+```
+
+### Output Format
+
+- **Hour**: 2 digits, 24-hour format (00-23)
+- **Minute**: 2 digits (00-59)
+- **Second**: 2 digits (00-59)
+- **Separator**: Colon (`:`)
+
+## Related Documentation
+
+- [CO2 Data Endpoint](/api/co2-endpoint) - API endpoint specification
+- [Dashboard Component](/components/dashboard) - Component implementation
+- [Real-time Monitoring](/features/real-time-monitoring) - How data flows through the application

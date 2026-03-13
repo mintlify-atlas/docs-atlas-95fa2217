@@ -1,0 +1,313 @@
+---
+title: Environment Setup
+description: Configure development and production environments for the CO2 Monitor
+---
+
+## Development Environment
+
+The CO2 Monitor is built with Create React App and uses standard React Scripts for development and production builds.
+
+### Available Scripts
+
+The following npm scripts are defined in `package.json`:
+
+```json
+{
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+### Development Server
+
+Start the development server:
+
+```bash
+npm start
+```
+
+This will:
+- Start the development server on `http://localhost:3000`
+- Enable hot reloading for instant feedback
+- Open your default browser automatically
+- Display build errors and warnings in the console
+
+### Production Build
+
+Create an optimized production build:
+
+```bash
+npm run build
+```
+
+This generates:
+- Minified and optimized JavaScript bundles
+- Static assets in the `build/` directory
+- Service worker for offline functionality (PWA)
+- Production-ready HTML, CSS, and JS files
+
+### Running Tests
+
+Execute the test suite:
+
+```bash
+npm test
+```
+
+Runs tests in interactive watch mode using Jest and React Testing Library.
+
+## Environment Variables
+
+Create React App supports environment variables for configuration without hardcoding values.
+
+### Creating Environment Files
+
+Create a `.env` file in the project root:
+
+```bash
+# .env
+REACT_APP_API_URL=https://co2-api.vercel.app/api/co2
+REACT_APP_POLL_INTERVAL=5000
+REACT_APP_DATA_POINTS=10
+```
+
+<Warning>
+  Only variables prefixed with `REACT_APP_` are embedded into the build. Other variables are ignored for security.
+</Warning>
+
+### Using Environment Variables
+
+Access environment variables in your code:
+
+```javascript
+// src/components/CO2Dashboard.js
+
+const API_URL = process.env.REACT_APP_API_URL || "https://co2-api.vercel.app/api/co2";
+const POLL_INTERVAL = parseInt(process.env.REACT_APP_POLL_INTERVAL) || 5000;
+const MAX_DATA_POINTS = parseInt(process.env.REACT_APP_DATA_POINTS) || 10;
+
+const fetchData = async () => {
+  const response = await axios.get(API_URL);
+  // ...
+};
+
+const intervalId = setInterval(fetchData, POLL_INTERVAL);
+```
+
+### Environment-Specific Files
+
+Create separate configuration for different environments:
+
+- `.env` - Default variables
+- `.env.local` - Local overrides (ignored by git)
+- `.env.development` - Development environment
+- `.env.production` - Production environment
+
+### Example Configuration
+
+```bash
+# .env.development
+REACT_APP_API_URL=http://localhost:3001/api/co2
+REACT_APP_POLL_INTERVAL=2000
+
+# .env.production
+REACT_APP_API_URL=https://co2-api.vercel.app/api/co2
+REACT_APP_POLL_INTERVAL=5000
+```
+
+## PWA Configuration
+
+The CO2 Monitor is configured as a Progressive Web App (PWA) for offline functionality and mobile installation.
+
+### Manifest Configuration
+
+The PWA manifest is located at `public/manifest.json`:
+
+```json
+{
+  "short_name": "CO2 Monitor",
+  "name": "Sistema de Monitoreo de CO2",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "version": "1.0.0"
+}
+```
+
+### Customizing the PWA
+
+#### Change App Name
+
+```json
+{
+  "short_name": "CO2",  // Shown on home screen (max 12 chars)
+  "name": "Office CO2 Monitor"  // Shown in app installation prompt
+}
+```
+
+#### Update Theme Colors
+
+```json
+{
+  "theme_color": "#4CAF50",  // Browser UI color
+  "background_color": "#f0f0f0"  // Splash screen background
+}
+```
+
+#### Display Modes
+
+```json
+{
+  "display": "standalone"  // Options: fullscreen, standalone, minimal-ui, browser
+}
+```
+
+- **standalone**: Looks like a native app (no browser UI)
+- **fullscreen**: Full screen, no status bar
+- **minimal-ui**: Minimal browser controls
+- **browser**: Regular browser tab
+
+### Service Worker
+
+Create React App includes a service worker for offline caching. Enable it in `src/index.js`:
+
+```javascript
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+
+// Change unregister() to register() for offline support
+serviceWorkerRegistration.register();
+```
+
+## Deployment Considerations
+
+### Build Settings
+
+Optimize the production build:
+
+```bash
+# Analyze bundle size
+npm run build -- --stats
+
+# Set public URL for subdirectory deployment
+PUBLIC_URL=/co2-monitor npm run build
+```
+
+### HTTPS Requirement
+
+PWA features (service workers, geolocation, etc.) require HTTPS in production. Ensure your hosting supports SSL/TLS.
+
+### CORS Configuration
+
+If your API is on a different domain, configure CORS headers on the API server:
+
+```javascript
+// API server CORS configuration
+Access-Control-Allow-Origin: https://your-app-domain.com
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+```
+
+### Proxy for Development
+
+For local API development, add a proxy to `package.json`:
+
+```json
+{
+  "proxy": "http://localhost:3001"
+}
+```
+
+Then use relative URLs in your code:
+
+```javascript
+const response = await axios.get("/api/co2");  // Proxied to localhost:3001
+```
+
+## Browser Support
+
+The application is configured to support modern browsers:
+
+```json
+{
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+```
+
+### Production Targets
+
+- Browsers with >0.2% market share
+- Actively maintained browsers ("not dead")
+- Excludes Opera Mini
+
+### Development Targets
+
+- Latest Chrome (for development speed)
+- Latest Firefox
+- Latest Safari
+
+## Dependencies
+
+Key dependencies used in the project:
+
+```json
+{
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "axios": "^1.7.7",
+    "chart.js": "^4.4.6",
+    "react-chartjs-2": "^5.2.0",
+    "react-scripts": "5.0.1"
+  }
+}
+```
+
+### Updating Dependencies
+
+```bash
+# Check for outdated packages
+npm outdated
+
+# Update all dependencies
+npm update
+
+# Update specific package
+npm install axios@latest
+```
+
+<Warning>
+  Test thoroughly after updating dependencies, especially major version changes.
+</Warning>

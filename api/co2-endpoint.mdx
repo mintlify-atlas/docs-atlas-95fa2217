@@ -1,0 +1,115 @@
+---
+title: 'CO2 Data Endpoint'
+description: 'Real-time CO2 measurement data from the external API'
+---
+
+## Overview
+
+The CO2 Monitor application fetches real-time carbon dioxide measurements from an external API endpoint. The data is polled every 5 seconds to provide live updates.
+
+## Endpoint
+
+<ParamField query="url" type="string" required>
+  ```
+  GET https://co2-api.vercel.app/api/co2
+  ```
+</ParamField>
+
+## Request
+
+The application makes a simple GET request with no authentication or parameters required.
+
+### Example Request
+
+From `src/components/CO2Dashboard.js:41`:
+
+```javascript
+const response = await axios.get("https://co2-api.vercel.app/api/co2");
+const { co2, timestamp } = response.data;
+```
+
+## Response
+
+The API returns a JSON object containing the current CO2 measurement and timestamp.
+
+<ResponseField name="co2" type="number" required>
+  The current CO2 level measurement in parts per million (ppm)
+</ResponseField>
+
+<ResponseField name="timestamp" type="string" required>
+  The timestamp when the measurement was taken, in format: `DD/MM/YY, HH:MM A.M./P.M.`
+  
+  Example: `"13/03/26, 02:30 P.M."`
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "co2": 412,
+  "timestamp": "13/03/26, 02:30 P.M."
+}
+```
+
+## Polling Strategy
+
+The dashboard implements automatic polling to keep data current:
+
+```javascript
+const fetchData = async () => {
+  try {
+    const response = await axios.get("https://co2-api.vercel.app/api/co2");
+    const { co2, timestamp } = response.data;
+    
+    setLatestCO2(co2);
+    // Update historical data (keeps last 10 readings)
+    setCo2Data((prevData) => {
+      const newData = [...prevData, co2];
+      if (newData.length > 10) newData.shift();
+      return newData;
+    });
+  } catch (error) {
+    console.error("Error fetching CO2 data:", error);
+  }
+};
+
+const intervalId = setInterval(fetchData, 5000); // Poll every 5 seconds
+```
+
+See `src/components/CO2Dashboard.js:39-64`
+
+## Error Handling
+
+The application implements basic error handling for API failures:
+
+<CodeGroup>
+```javascript Error Handling
+try {
+  const response = await axios.get("https://co2-api.vercel.app/api/co2");
+  const { co2, timestamp } = response.data;
+  // Process data...
+} catch (error) {
+  console.error("Error fetching CO2 data:", error);
+  // Application continues running, retrying on next interval
+}
+```
+</CodeGroup>
+
+### Error Scenarios
+
+- **Network Errors**: Logged to console, polling continues
+- **Invalid Response**: Logged to console, polling continues
+- **API Unavailable**: Gracefully handled, "Cargando..." shown to user
+
+## Data Retention
+
+The dashboard maintains a rolling window of the last 10 measurements for chart visualization:
+
+```javascript
+if (newData.length > 10) newData.shift(); // Remove oldest reading
+```
+
+## Related Documentation
+
+- [Data Format](/api/data-format) - Learn about timestamp parsing and formatting
+- [Dashboard Component](/components/dashboard) - Component that consumes this API

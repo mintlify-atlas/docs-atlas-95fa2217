@@ -1,0 +1,133 @@
+---
+title: 'Header Component'
+description: 'Application header with title display'
+---
+
+## Overview
+
+The `Header` component is a simple, presentational component that displays the application title. It's a stateless functional component with no props or logic.
+
+**Location:** `src/components/Header.js`
+
+## Implementation
+
+The component is straightforward and concise:
+
+```javascript
+import React from "react";
+import './Header.css';
+
+function Header() {
+    return (
+        <header>
+            <h1 className="titulo">Sistema de Monitoreo de CO2</h1>
+        </header>
+    );
+}
+
+export default Header;
+```
+
+## Component Structure
+
+<ResponseField name="header" type="element">
+  Semantic HTML5 header element
+</ResponseField>
+
+<ResponseField name="h1" type="element">
+  Heading with className "titulo" displaying the application name
+</ResponseField>
+
+## Styling
+
+The component uses `Header.css` with the `.titulo` class:
+
+```css
+.titulo {
+    font-size: 2.5em;
+    color: #001d1a;
+    margin-bottom: 0px;
+    padding: 0px;
+    font-weight: bold;
+}
+```
+
+### Style Properties
+
+<ParamField path="font-size" type="string" default="2.5em">
+  Large, prominent heading size
+</ParamField>
+
+<ParamField path="color" type="string" default="#001d1a">
+  Dark teal/black color for high contrast
+</ParamField>
+
+<ParamField path="font-weight" type="string" default="bold">
+  Bold text for emphasis
+</ParamField>
+
+<ParamField path="margin/padding" type="string" default="0px">
+  No extra spacing around the title
+</ParamField>
+
+## Responsive Design
+
+The header adapts to smaller screens with media queries:
+
+```css
+@media (max-width: 768px) {
+    .titulo {
+        font-size: 1.2em
+    }
+}
+
+@media (max-width: 480px) {
+    .titulo {
+        font-size: 1.2em
+    }
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Desktop" icon="desktop">
+    2.5em font size for larger screens
+  </Card>
+  <Card title="Mobile" icon="mobile">
+    1.2em font size for tablets and phones
+  </Card>
+</CardGroup>
+
+## Usage
+
+Import and use the Header component at the top of your application:
+
+```javascript
+import Header from './components/Header';
+
+function App() {
+    return (
+        <div className="App">
+            <Header />
+            {/* Other components */}
+        </div>
+    );
+}
+```
+
+## Props
+
+This component accepts **no props**. The title text is hardcoded in Spanish as "Sistema de Monitoreo de CO2" (CO2 Monitoring System).
+
+<Note>
+If you need to customize the title, consider passing it as a prop:
+
+```javascript
+function Header({ title }) {
+    return (
+        <header>
+            <h1 className="titulo">{title}</h1>
+        </header>
+    );
+}
+```
+</Note>

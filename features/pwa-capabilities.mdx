@@ -1,0 +1,258 @@
+---
+title: 'PWA Capabilities'
+description: 'Progressive Web App features for offline access and installation'
+---
+
+## Overview
+
+The CO2 Monitor is built as a Progressive Web App (PWA), enabling users to install it on their devices and access certain features offline. This provides a native app-like experience directly from the web browser.
+
+## Web App Manifest
+
+The application includes a `manifest.json` file that defines PWA metadata:
+
+```json public/manifest.json
+{
+  "short_name": "CO2 Monitor",
+  "name": "Sistema de Monitoreo de CO2",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "version": "1.0.0"
+}
+```
+
+## Manifest Configuration
+
+<CardGroup cols={2}>
+  <Card title="Display Mode" icon="window-restore">
+    `standalone` - Runs in a separate window without browser UI
+  </Card>
+  <Card title="Start URL" icon="house">
+    `.` - Opens at the application root
+  </Card>
+  <Card title="Theme Color" icon="palette">
+    `#000000` - Black theme for system UI
+  </Card>
+  <Card title="Background Color" icon="fill">
+    `#ffffff` - White splash screen background
+  </Card>
+</CardGroup>
+
+## Icon Configuration
+
+The manifest defines multiple icon sizes for different device contexts:
+
+| Size | File | Purpose |
+|------|------|----------|
+| 16x16 - 64x64 | `favicon.ico` | Browser tabs, bookmarks |
+| 192x192 | `logo192.png` | Android home screen, notifications |
+| 512x512 | `logo512.png` | High-resolution displays, splash screens |
+
+<Info>
+Multiple icon sizes ensure the app looks sharp on all devices, from mobile phones to high-DPI desktop displays.
+</Info>
+
+## HTML Integration
+
+The manifest is linked in the HTML head:
+
+```html public/index.html
+<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+<link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+<meta name="theme-color" content="#000000" />
+<meta name="description"
+  content="Sistema de monitoreo de CO2 para invernaderos. Monitorea los niveles de CO2 en tiempo real para un ambiente saludable y controlado." />
+```
+
+### Meta Tags
+
+<AccordionGroup>
+  <Accordion title="theme-color">
+    Customizes the browser's UI color to match the app's branding (`#000000` - black).
+  </Accordion>
+  
+  <Accordion title="apple-touch-icon">
+    Specifies the icon used when adding the app to an iOS device's home screen.
+  </Accordion>
+  
+  <Accordion title="viewport">
+    Ensures proper responsive scaling: `width=device-width, initial-scale=1`
+  </Accordion>
+  
+  <Accordion title="description">
+    SEO-friendly description that appears in search results and social media previews.
+  </Accordion>
+</AccordionGroup>
+
+## Installation Experience
+
+### Desktop Installation
+
+On desktop browsers (Chrome, Edge), users can install the app via:
+1. Browser's install button in the address bar
+2. Settings menu → "Install CO2 Monitor"
+
+### Mobile Installation
+
+**Android (Chrome)**
+- "Add to Home Screen" prompt appears automatically
+- Manual: Menu → "Add to Home Screen"
+
+**iOS (Safari)**
+- Tap Share button
+- Select "Add to Home Screen"
+- Enter name and confirm
+
+<Note>
+iOS has limited PWA support compared to Android. Service worker functionality may be restricted.
+</Note>
+
+## Responsive Design
+
+The application uses CSS media queries for optimal display on all screen sizes:
+
+```css src/components/CO2Dashboard.css
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .dashboard h1 {
+        font-size: 2em;
+    }
+    .chart-container {
+        height: 300px;
+        width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard h2 {
+        font-size: 1.2em;
+    }
+    .dashboard h1 {
+        font-size: 1.5em;
+    }
+    .chart-container {
+        height: 250px;
+        width: auto;
+    }
+}
+```
+
+<CardGroup cols={3}>
+  <Card title="Desktop" icon="desktop">
+    Full-size charts (400px height)
+  </Card>
+  <Card title="Tablet" icon="tablet">
+    Medium charts (300px height)
+  </Card>
+  <Card title="Mobile" icon="mobile">
+    Compact charts (250px height)
+  </Card>
+</CardGroup>
+
+## Offline Capabilities
+
+<Warning>
+The current implementation does not include a service worker, which means:
+- The app requires an active internet connection to function
+- Real-time data fetching depends on API availability
+- No offline caching of historical data
+</Warning>
+
+### Adding Service Worker Support
+
+To enable offline capabilities, a service worker would need to be implemented to:
+
+1. **Cache static assets** (HTML, CSS, JS)
+2. **Cache API responses** for offline viewing
+3. **Implement background sync** for data updates
+4. **Handle network failures gracefully**
+
+Create React App includes service worker support that can be enabled in `src/index.js`:
+
+```javascript
+// Currently disabled
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+
+// To enable:
+serviceWorkerRegistration.register();
+```
+
+## Performance Optimization
+
+The PWA structure enables several performance benefits:
+
+<Steps>
+  <Step title="Fast Initial Load">
+    Minimal HTML structure with React handling rendering
+  </Step>
+  
+  <Step title="Responsive Assets">
+    Multiple icon sizes prevent unnecessary large file downloads
+  </Step>
+  
+  <Step title="Standalone Display">
+    Removes browser chrome, maximizing screen space
+  </Step>
+  
+  <Step title="Theme Integration">
+    System UI adapts to app theme for cohesive experience
+  </Step>
+</Steps>
+
+## Future Enhancements
+
+<CardGroup cols={2}>
+  <Card title="Service Worker" icon="gears">
+    Implement caching strategy for offline data access
+  </Card>
+  <Card title="Push Notifications" icon="bell">
+    Alert users when CO2 levels exceed thresholds
+  </Card>
+  <Card title="Background Sync" icon="arrows-rotate">
+    Queue data updates when offline
+  </Card>
+  <Card title="Install Prompts" icon="download">
+    Custom UI to encourage PWA installation
+  </Card>
+</CardGroup>
+
+## Browser Support
+
+PWA features work best in modern browsers:
+
+| Browser | Installation | Standalone Mode | Service Workers |
+|---------|--------------|-----------------|------------------|
+| Chrome (Android) | ✅ | ✅ | ✅ |
+| Chrome (Desktop) | ✅ | ✅ | ✅ |
+| Edge | ✅ | ✅ | ✅ |
+| Safari (iOS) | ⚠️ Limited | ✅ | ⚠️ Limited |
+| Firefox | ❌ | ⚠️ | ✅ |
+
+<Check>
+The app is fully functional in all modern browsers, with enhanced PWA features in Chromium-based browsers.
+</Check>
